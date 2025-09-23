@@ -1,4 +1,4 @@
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from enum import Enum
 from pydantic import BaseModel, Field, field_validator, model_validator, ConfigDict
 
@@ -51,10 +51,31 @@ class FieldDefinition(BaseModel):
         return self
 
 
+class Condition(BaseModel):
+    entity: str
+    local_field: str
+    field: str
+    op: str = "eq"        # eq, neq, gt, lt, in
+    value: Any
+
+
+class Action(BaseModel):
+    action: str
+    field: str
+    min: Optional[int] = None
+    max: Optional[int] = None
+
+
+class Rule(BaseModel):
+    if_: Condition = Field(alias="if")
+    then: Action
+
+
 class EntityDefinition(BaseModel):
     """Описание одной сущности"""
     count: int = Field(gt=0, le=100_000, description="Количество записей")
     fields: Dict[str, FieldDefinition]
+    rules: List[Rule] = Field(default_factory=list)
 
     model_config = ConfigDict(extra="forbid")
 

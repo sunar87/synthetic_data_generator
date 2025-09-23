@@ -18,7 +18,7 @@ class IntegerFieldGenerator(FieldValueGenerator):
     def generate(self) -> int:
         return self.faker.random_int(
             min=self.params.get("min", 0),
-            max=self.params.get("max", 100)
+            max=self.params.get("max", 10000)
         )
 
 
