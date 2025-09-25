@@ -24,7 +24,7 @@ def main():
             "rules": [
                 {
                     "if": {"entity": "users", "local_field": "user_id", "field": "is_vip", "op": "eq", "value": True},
-                    "then": {"action": "set", "field": "price", "min": 1000, "max": 1001}
+                    "then": {"action": "set", "field": "price", "min": 1000, "max": 1003}
                 }
             ]
             }
@@ -33,13 +33,10 @@ def main():
 
     request = GenerationRequest(
         blueprint=Blueprint(**blueprint_config),
-        seed=415
+        seed=4425
     )
-
     engine = DataGenerationEngine(seed=request.seed)
     result = engine.execute(request.blueprint)
-
-    print(json.dumps(result, indent=2, ensure_ascii=False))
 
     with open("generated.json", "w", encoding="utf-8") as f:
         json.dump(result, f, indent=2, ensure_ascii=False)
