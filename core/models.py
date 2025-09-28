@@ -23,7 +23,7 @@ class FieldDefinition(BaseModel):
         """Пример проверки параметров в зависимости от типа"""
         field_type = info.data.get("type")
         if field_type == FieldType.STRING:
-            allowed = {"min_length", "max_length"}
+            allowed = {"min_length", "max_length", "subtype"}
         elif field_type == FieldType.INTEGER:
             allowed = {"min", "max"}
         elif field_type == FieldType.FLOAT:

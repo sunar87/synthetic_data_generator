@@ -56,15 +56,15 @@ def validate_rules(blueprint: Blueprint):
                     f"[Ошибка] Для BOOLEAN поля '{cond_field}' "
                     f"разрешены только операторы eq/neq, но указан '{cond.op}'"
                 )
-            if target_fdef.type in {FieldType.INTEGER, FieldType.FLOAT} and cond.op not in {"eq", "neq", "gt", "lt", "in"}:
+            if target_fdef.type in {FieldType.INTEGER, FieldType.FLOAT} and cond.op not in {"eq", "neq", "gt", "lt"}:
                 raise ValueError(
                     f"[Ошибка] Для числового поля '{cond_field}' "
                     f"недопустимый оператор '{cond.op}'"
                 )
-            if target_fdef.type == FieldType.STRING and cond.op not in {"eq", "neq", "in"}:
+            if target_fdef.type == FieldType.STRING:
                 raise ValueError(
                     f"[Ошибка] Для STRING поля '{cond_field}' "
-                    f"недопустимый оператор '{cond.op}'"
+                    f"нет допустимых операторов"
                 )
 
 
@@ -100,8 +100,6 @@ def match_condition(entity_data: dict, context: dict, cond: dict) -> bool:
         return left > val
     if op == "lt":
         return left < val
-    if op == "in":
-        return left in val
     return False
 
 

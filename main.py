@@ -9,8 +9,9 @@ def main():
             "count": 3,
             "fields": {
                 "id": {"type": "integer"},
-                "name": {"type": "string", "params": {"max_length": 10}},
-                "is_vip": {"type": "boolean"}
+                "first_name": {"type": "string", "params": {"max_length": 20, "subtype": "first_name"}},
+                "last_name": {"type": "string", "params": {"max_length": 20, "subtype": "last_name"}},
+                "is_vip": {"type": "boolean"},
             }
             },
         "orders": {
@@ -33,7 +34,7 @@ def main():
 
     request = GenerationRequest(
         blueprint=Blueprint(**blueprint_config),
-        seed=4425
+        seed=4125
     )
     engine = DataGenerationEngine(seed=request.seed)
     result = engine.execute(request.blueprint)
