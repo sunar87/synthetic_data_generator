@@ -9,6 +9,7 @@ class FieldType(str, Enum):
     FLOAT = "float"
     BOOLEAN = "boolean"
     REFERENCE = "reference"
+    ONE_TO_MANY = 'one_to_many'
 
 
 class FieldDefinition(BaseModel):
@@ -32,6 +33,8 @@ class FieldDefinition(BaseModel):
             allowed = set()
         elif field_type == FieldType.REFERENCE:
             allowed = {"entity", "field"}
+        elif field_type == FieldType.ONE_TO_MANY:
+            allowed = {"entity", "foreign_field", "embed", "parent_field"}
         else:
             allowed = set()
 

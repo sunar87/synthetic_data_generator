@@ -1,7 +1,7 @@
 from fastapi import APIRouter, HTTPException
 from core.models import GenerationRequest
 from core.engine import DataGenerationEngine
-from core.validators import validate_rules
+from core.validators import validate_rules, validate_one_to_many
 
 router = APIRouter()
 
@@ -11,6 +11,7 @@ async def generate(req: GenerationRequest):
     try:
         blueprint = req.blueprint
         validate_rules(blueprint)
+        validate_one_to_many(blueprint)
         engine = DataGenerationEngine(seed=req.seed)
         data = engine.execute(blueprint)
         return {"status": "success", "data": data}
@@ -23,6 +24,7 @@ async def validate(req: GenerationRequest):
     try:
         blueprint = req.blueprint
         validate_rules(blueprint)
+        validate_one_to_many(blueprint)
         return {"status": "valid", "message": "Blueprint is valid"}
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

@@ -79,3 +79,9 @@ class ReferenceFieldGenerator(FieldValueGenerator):
 
         ref_obj = self.faker.random_element(self.context[entity])
         return ref_obj[field]
+
+
+@registry.register(FieldType.ONE_TO_MANY)
+class OneToManyFieldGenerator(FieldValueGenerator):
+    def generate(self):
+        return []

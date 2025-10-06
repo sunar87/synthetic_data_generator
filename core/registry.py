@@ -31,15 +31,25 @@ class GeneratorRegistry:
         name: str,
         faker: Faker,
         params: Dict[str, Any],
-        context: Optional[Dict[str, Any]] = None
+        context: Optional[Dict[str, Any]] = None,
+        field_name: Optional[str] = None
     ) -> FieldValueGenerator:
         generator_cls = self.get_generator(name)
 
-        # Проверяем, принимает ли генератор context
         try:
             return generator_cls(faker, params, context)
         except TypeError:
+            pass
+
+        try:
+            return generator_cls(faker, params, field_name)
+        except TypeError:
+            pass
+
+        try:
             return generator_cls(faker, params)
+        except TypeError as e:
+            raise TypeError(f"Cannot instantiate generator {generator_cls}: {e}")
 
     @staticmethod
     def _normalize_key(name: Union[str, FieldType]) -> FieldType:
