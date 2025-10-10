@@ -15,7 +15,6 @@ def topo_sort(blueprint):
     graph = defaultdict(list)
     indegree = defaultdict(int)
 
-    # Построим граф зависимостей
     for entity_name, entity_def in blueprint.entities.items():
         indegree.setdefault(entity_name, 0)
         for field_def in entity_def.fields.values():
@@ -66,9 +65,7 @@ class DataGenerationEngine:
                 cond = rule.if_
                 action = rule.then
 
-                # Проверяем, выполняется ли условие
                 if match_condition(entity_data, context, cond):
-                    # Применяем действие
                     apply_action(entity_data, self.faker, action)
 
     def generate_entity(self, entity_name: str, definition: Dict[str, FieldDefinition], count: int, context: Dict[str, List[Dict[str, Any]]]) -> List[Dict[str, Any]]:
@@ -96,7 +93,6 @@ class DataGenerationEngine:
         parent_field = fdef.params.get("parent_field", "id")
         embed = bool(fdef.params.get("embed", False))
 
-        # Небольшая оптимизация: индексировать children по foreign_field
         index = {}
         for child in context.get(child_entity, []):
             key = child.get(foreign_field)
@@ -109,7 +105,6 @@ class DataGenerationEngine:
             if embed:
                 parent[field_name] = [child.copy() for child in children]
             else:
-                # по умолчанию — список id'ов детей (предполагается, что у child есть поле "id")
                 parent[field_name] = [child.get("id") for child in children]
 
     def execute(self, blueprint: Blueprint) -> Dict[str, List[Dict[str, Any]]]:
@@ -118,7 +113,6 @@ class DataGenerationEngine:
 
         order = topo_sort(blueprint)
 
-        # Генерируем сущности в порядке topological sort
         for entity_name in order:
             entity_def = blueprint.entities[entity_name]
             generated = self.generate_entity(entity_name, entity_def.fields, entity_def.count, context)

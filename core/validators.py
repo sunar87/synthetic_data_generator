@@ -70,7 +70,6 @@ def validate_one_to_many(blueprint: Blueprint) -> bool:
     Если таких связей нет — просто возвращает True.
     """
 
-    # Пройдёмся по всем сущностям
     for entity_name, entity_def in blueprint.entities.items():
         for field_name, field_def in entity_def.fields.items():
             if field_def.type == FieldType.REFERENCE:
@@ -82,20 +81,14 @@ def validate_one_to_many(blueprint: Blueprint) -> bool:
                         f"[Ошибка] Поле '{field_name}' в сущности '{entity_name}' "
                         f"имеет некорректную reference-ссылку."
                     )
-
-                # Проверим, что ссылка указывает на существующую сущность
                 if ref_entity not in blueprint.entities:
                     raise ValueError(
                         f"[Ошибка] Reference в '{entity_name}.{field_name}' "
                         f"указывает на несуществующую сущность '{ref_entity}'."
                     )
-
-                # Проверим, что указываемое поле существует
                 if ref_field not in blueprint.entities[ref_entity].fields:
                     raise ValueError(
                         f"[Ошибка] Reference в '{entity_name}.{field_name}' "
                         f"указывает на несуществующее поле '{ref_field}'."
                     )
-
-    # Если всё ок — возвращаем True
     return True
