@@ -34,9 +34,99 @@
 
 ## 📜 Пример запроса
 
+### 1. Простые поля (STRING, INTEGER, BOOLEAN)
+
 ```json
 {
   "seed": 42,
+  "blueprint": {
+    "entities": {
+      "users": {
+        "count": 3,
+        "fields": {
+          "id": { "type": "integer" },
+          "name": { "type": "string", "params": { "subtype": "name" } },
+          "is_vip": { "type": "boolean" }
+        }
+      }
+    }
+  }
+}
+```
+
+---
+
+### 2. Reference (один к одному/foreign key)
+
+```json
+{
+  "seed": 101,
+  "blueprint": {
+    "entities": {
+      "users": {
+        "count": 2,
+        "fields": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" }
+        }
+      },
+      "orders": {
+        "count": 5,
+        "fields": {
+          "id": { "type": "integer" },
+          "product": { "type": "string" },
+          "user_id": { "type": "reference", "params": { "entity": "users", "field": "id" } }
+        }
+      }
+    }
+  }
+}
+```
+
+---
+
+### 3. One-to-Many (встраивание зависимых сущностей)
+
+```json
+{
+  "seed": 202,
+  "blueprint": {
+    "entities": {
+      "users": {
+        "count": 3,
+        "fields": {
+          "id": { "type": "integer" },
+          "name": { "type": "string" },
+          "orders": {
+            "type": "one_to_many",
+            "params": {
+              "entity": "orders",
+              "foreign_field": "user_id",
+              "embed": true
+            }
+          }
+        }
+      },
+      "orders": {
+        "count": 6,
+        "fields": {
+          "id": { "type": "integer" },
+          "product": { "type": "string" },
+          "user_id": { "type": "reference", "params": { "entity": "users", "field": "id" } }
+        }
+      }
+    }
+  }
+}
+```
+
+---
+
+### 4. Reference + One-to-Many (условия + вложенные связи)
+
+```json
+{
+  "seed": 303,
   "blueprint": {
     "entities": {
       "users": {
@@ -61,10 +151,7 @@
           "id": { "type": "integer" },
           "product": { "type": "string" },
           "price": { "type": "integer", "params": { "min": 10, "max": 500 } },
-          "user_id": {
-            "type": "reference",
-            "params": { "entity": "users", "field": "id" }
-          }
+          "user_id": { "type": "reference", "params": { "entity": "users", "field": "id" } }
         },
         "rules": [
           {
@@ -88,7 +175,6 @@
   }
 }
 ```
-
 ---
 
 ## 🧩 Основные сущности
