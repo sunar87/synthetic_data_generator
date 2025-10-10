@@ -327,9 +327,9 @@
 
 ## 📞 Связь в разработчиком
 
-https://Github.com/sunar87 - github
-@sunar877 - Telegram
-sunar877@yandex.ru - email
+- https://Github.com/sunar87 - github
+- @sunar877 - Telegram
+- sunar877@yandex.ru - email
 
 ## 🧾 Лицензия
 
