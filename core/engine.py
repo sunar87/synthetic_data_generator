@@ -68,7 +68,13 @@ class DataGenerationEngine:
                 if match_condition(entity_data, context, cond):
                     apply_action(entity_data, self.faker, action)
 
-    def generate_entity(self, entity_name: str, definition: Dict[str, FieldDefinition], count: int, context: Dict[str, List[Dict[str, Any]]]) -> List[Dict[str, Any]]:
+    def generate_entity(
+            self,
+            entity_name: str,
+            definition: Dict[str, FieldDefinition],
+            count: int,
+            context: Dict[str, List[Dict[str, Any]]]
+            ) -> List[Dict[str, Any]]:
         results = []
         generators = {
             fname: registry.create_instance(
@@ -87,12 +93,29 @@ class DataGenerationEngine:
 
         return results
 
-    def _resolve_one_to_many(self, context: Dict[str, List[Dict[str, Any]]], parent_entity: str, field_name: str, fdef: FieldDefinition):
+    def _resolve_one_to_many(
+            self,
+            context: Dict[str, List[Dict[str, Any]]],
+            parent_entity: str, field_name: str, fdef: FieldDefinition,
+            blueprint: Blueprint
+            ):
         child_entity = fdef.params["entity"]
         foreign_field = fdef.params["foreign_field"]
         parent_field = fdef.params.get("parent_field", "id")
         embed = bool(fdef.params.get("embed", False))
+        child_def = blueprint.entities[child_entity]
 
+        if foreign_field not in child_def.fields:
+            raise ValueError(
+                f"Поле '{foreign_field}' отсутствует в сущности '{child_entity}'"
+            )
+
+        foreign_field_def = child_def.fields[foreign_field]
+        if foreign_field_def.type.name != "REFERENCE":
+            raise ValueError(
+                f"Поле '{foreign_field}' в '{child_entity}' должно быть типа REFERENCE, "
+                f"а не {foreign_field_def.type.name}"
+            )
         index = {}
         for child in context.get(child_entity, []):
             key = child.get(foreign_field)
@@ -115,7 +138,12 @@ class DataGenerationEngine:
 
         for entity_name in order:
             entity_def = blueprint.entities[entity_name]
-            generated = self.generate_entity(entity_name, entity_def.fields, entity_def.count, context)
+            generated = self.generate_entity(
+                entity_name,
+                entity_def.fields,
+                entity_def.count,
+                context
+            )
             results[entity_name] = generated
             context[entity_name] = generated
 
@@ -124,6 +152,12 @@ class DataGenerationEngine:
         for parent_entity, parent_def in blueprint.entities.items():
             for fname, fdef in parent_def.fields.items():
                 if fdef.type == FieldType.ONE_TO_MANY:
-                    self._resolve_one_to_many(context, parent_entity, fname, fdef)
+                    self._resolve_one_to_many(
+                        context,
+                        parent_entity,
+                        fname,
+                        fdef,
+                        blueprint
+                    )
 
         return results

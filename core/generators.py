@@ -35,6 +35,12 @@ class StringFieldGenerator(FieldValueGenerator):
         return self.faker.text(max_nb_chars=max_len).strip()
 
 
+@registry.register(FieldType.EMAIL)
+class EmailFieldGenerator(FieldValueGenerator):
+    def generate(self) -> str:
+        return self.faker.email()
+
+
 @registry.register(FieldType.INTEGER)
 class IntegerFieldGenerator(FieldValueGenerator):
     def generate(self) -> int:
@@ -42,6 +48,12 @@ class IntegerFieldGenerator(FieldValueGenerator):
             min=self.params.get("min", 0),
             max=self.params.get("max", 10000)
         )
+
+
+@registry.register(FieldType.UUID)
+class UUIDFieldGenerator(FieldValueGenerator):
+    def generate(self) -> str:
+        return self.faker.uuid4()
 
 
 @registry.register(FieldType.FLOAT)

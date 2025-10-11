@@ -210,6 +210,8 @@
 | `integer` | Целые числа в заданном диапазоне | `42` |
 | `float` | Вещественные числа (с плавающей точкой) | `3.14` |
 | `boolean` | Логическое значение | `true` / `false` |
+| `uuid` | uuid v4 | `fe342a0c-c2ae-4f65-bfd8-19c030033c09` |
+| `email` | Email поле | `test@gmail.com` |
 | `reference` | Ссылка на другую сущность (Foreign Key) | `user_id = users.id` |
 | `one_to_many` | Вложенные данные (список связанных элементов) | `orders: [ {id: 1, ...} ]` |
 

@@ -6,7 +6,9 @@ from pydantic import BaseModel, Field, field_validator, model_validator, ConfigD
 class FieldType(str, Enum):
     STRING = "string"
     INTEGER = "integer"
+    UUID = 'uuid'
     FLOAT = "float"
+    EMAIL = 'email'
     BOOLEAN = "boolean"
     REFERENCE = "reference"
     ONE_TO_MANY = 'one_to_many'
