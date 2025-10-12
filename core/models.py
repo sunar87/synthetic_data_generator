@@ -78,7 +78,7 @@ class Rule(BaseModel):
 
 class EntityDefinition(BaseModel):
     """Описание одной сущности"""
-    count: int = Field(gt=0, le=100_000, description="Количество записей")
+    count: int = Field(gt=0, le=5000, description="Количество записей")
     fields: Dict[str, FieldDefinition]
     rules: List[Rule] = Field(default_factory=list)
 

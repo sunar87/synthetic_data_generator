@@ -91,4 +91,37 @@ def validate_one_to_many(blueprint: Blueprint) -> bool:
                         f"[Ошибка] Reference в '{entity_name}.{field_name}' "
                         f"указывает на несуществующее поле '{ref_field}'."
                     )
+            elif field_def.type == FieldType.ONE_TO_MANY:
+                params = field_def.params or {}
+                child_entity = params.get("entity")
+                foreign_field = params.get("foreign_field")
+
+                if not child_entity or not foreign_field:
+                    raise ValueError(
+                        f"[Ошибка] Поле '{field_name}' в сущности '{entity_name}' "
+                        f"должно содержать параметры 'entity' и 'foreign_field'."
+                    )
+
+                # Проверяем, что дочерняя сущность существует
+                if child_entity not in blueprint.entities:
+                    raise ValueError(
+                        f"[Ошибка] ONE_TO_MANY '{entity_name}.{field_name}' "
+                        f"указывает на несуществующую сущность '{child_entity}'."
+                    )
+
+                # Проверяем, что foreign_field существует
+                child_fields = blueprint.entities[child_entity].fields
+                if foreign_field not in child_fields:
+                    raise ValueError(
+                        f"[Ошибка] ONE_TO_MANY '{entity_name}.{field_name}' "
+                        f"указывает на несуществующее поле '{foreign_field}' "
+                        f"в сущности '{child_entity}'."
+                    )
+
+                # Проверяем, что foreign_field — типа REFERENCE
+                if child_fields[foreign_field].type != FieldType.REFERENCE:
+                    raise ValueError(
+                        f"[Ошибка] Поле '{foreign_field}' в дочерней сущности '{child_entity}' "
+                        f"должно быть типа REFERENCE для связи '{entity_name}.{field_name}'."
+                    )
     return True

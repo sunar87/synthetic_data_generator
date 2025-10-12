@@ -6,11 +6,11 @@ def match_condition(entity_data: dict, context: dict, cond: dict) -> bool:
     Проверяет условие cond для текущей записи.
     cond: Condition (pydantic)
     """
-    ent = cond.entity
-    local_field = cond.local_field
-    target_field = cond.field
-    op = cond.op
-    val = cond.value
+    ent = getattr(cond, "entity", None) or cond.get("entity")
+    local_field = getattr(cond, "local_field", None) or cond.get("local_field")
+    target_field = getattr(cond, "field", None) or cond.get("field")
+    op = getattr(cond, "op", None) or cond.get("op")
+    val = getattr(cond, "value", None) or cond.get("value")
 
     if ent not in context:
         return False
@@ -40,19 +40,20 @@ def apply_action(entity_data: dict, faker: Faker, action: dict):
     """
     Применяет действие action к entity_data.
     """
-    field_name = action.field
-    act = action.action
+    field_name = getattr(action, "field", None) or action.get("field")
+    act = getattr(action, "action", None) or action.get("action")
 
     if act == "set":
         entity_data[field_name] = faker.random_int(
-            min=action.min or 0,
-            max=action.max or 10000
+            min=getattr(action, "min", None) or action.get("min", 0),
+            max=getattr(action, "max", None) or action.get("max", 10000)
         )
     elif act == "adjust":
         cur = entity_data.get(field_name, 0)
-        min_v = action.min
+        min_v = getattr(action, "min", None) or action.get("min")
+        max_v = getattr(action, "max", None) or action.get("max")
         if min_v is not None and cur < min_v:
             entity_data[field_name] = faker.random_int(
                 min=min_v,
-                max=action.max or (min_v * 2)
+                max=max_v or (min_v * 2)
             )
