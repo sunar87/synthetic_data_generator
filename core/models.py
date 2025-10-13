@@ -6,12 +6,12 @@ from pydantic import BaseModel, Field, field_validator, model_validator, ConfigD
 class FieldType(str, Enum):
     STRING = "string"
     INTEGER = "integer"
-    UUID = 'uuid'
+    UUID = "uuid"
     FLOAT = "float"
-    EMAIL = 'email'
+    EMAIL = "email"
     BOOLEAN = "boolean"
     REFERENCE = "reference"
-    ONE_TO_MANY = 'one_to_many'
+    ONE_TO_MANY = "one_to_many"
 
 
 class FieldDefinition(BaseModel):
@@ -55,13 +55,27 @@ class FieldDefinition(BaseModel):
                 )
         return self
 
+    def to_dict(self):
+        return self.model_dump()
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        return cls(**data)
+
 
 class Condition(BaseModel):
     entity: str
     local_field: str
     field: str
-    op: str = "eq"        # eq, neq, gt, lt, in
+    op: str = "eq"
     value: Any
+
+    def to_dict(self):
+        return self.model_dump()
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        return cls(**data)
 
 
 class Action(BaseModel):
@@ -70,10 +84,32 @@ class Action(BaseModel):
     min: Optional[int] = None
     max: Optional[int] = None
 
+    def to_dict(self):
+        return self.model_dump()
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        return cls(**data)
+
 
 class Rule(BaseModel):
     if_: Condition = Field(alias="if")
     then: Action
+
+    model_config = ConfigDict(populate_by_name=True)
+
+    def to_dict(self):
+        return {
+            "if": self.if_.to_dict(),
+            "then": self.then.to_dict(),
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        return cls(
+            if_=Condition.from_dict(data["if"]),
+            then=Action.from_dict(data["then"]),
+        )
 
 
 class EntityDefinition(BaseModel):
@@ -90,6 +126,21 @@ class EntityDefinition(BaseModel):
             raise ValueError("У сущности должно быть хотя бы одно поле")
         return v
 
+    def to_dict(self):
+        return {
+            "count": self.count,
+            "fields": {k: v.to_dict() for k, v in self.fields.items()},
+            "rules": [r.to_dict() for r in self.rules],
+        }
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        return cls(
+            count=data["count"],
+            fields={k: FieldDefinition.from_dict(v) for k, v in data.get("fields", {}).items()},
+            rules=[Rule.from_dict(r) for r in data.get("rules", [])],
+        )
+
 
 class Blueprint(BaseModel):
     """Чертёж, описывающий набор сущностей"""
@@ -103,6 +154,15 @@ class Blueprint(BaseModel):
             raise ValueError("Blueprint должен содержать хотя бы одну сущность")
         return self
 
+    def to_dict(self):
+        return {"entities": {k: v.to_dict() for k, v in self.entities.items()}}
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        return cls(
+            entities={k: EntityDefinition.from_dict(v) for k, v in data.get("entities", {}).items()}
+        )
+
 
 class GenerationRequest(BaseModel):
     """Запрос на генерацию данных по чертежу"""
@@ -110,3 +170,10 @@ class GenerationRequest(BaseModel):
     seed: Optional[int] = None
 
     model_config = ConfigDict(extra="forbid")
+
+    def to_dict(self):
+        return self.model_dump()
+
+    @classmethod
+    def from_dict(cls, data: dict):
+        return cls(**data)

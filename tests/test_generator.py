@@ -3,7 +3,7 @@ from fastapi.testclient import TestClient
 from core.engine import DataGenerationEngine
 from core.models import Blueprint, EntityDefinition, FieldDefinition, FieldType
 from core.validators import validate_rules, validate_one_to_many
-from api.routes import router
+from api.routes import download, generate, health
 from api.main import app
 
 
@@ -241,6 +241,33 @@ def test_api_validate_endpoint():
 
 
 def test_default_endpoint():
-    response = client.get('/')
+    response = client.get('/api/health')
     assert response.status_code == 200
-    assert response.json()['message'] == 'API is running!'
+    assert response.json()['status'] == 'ok'
+
+
+def test_generate_and_download(tmp_path):
+    blueprint = {
+        "blueprint": {
+            "entities": {
+                "users": {
+                    "count": 2,
+                    "fields": {
+                        "id": {"type": "integer", "params": {"min": 1, "max": 100}},
+                        "name": {"type": "string", "params": {"min_length": 5, "max_length": 10}}
+                    }
+                }
+            }
+        }
+    }
+
+    response = client.post("/api/generate", json=blueprint)
+    assert response.status_code == 200
+    body = response.json()
+    assert "data" in body
+    assert "download_url" in body
+
+    filename = body["download_url"].split("/")[-1]
+    downloads = client.get(f"/api/download/{filename}")
+    assert downloads.status_code == 200
+    assert downloads.headers["content-type"] == "application/json"

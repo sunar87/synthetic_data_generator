@@ -30,9 +30,20 @@ def match_condition(entity_data: dict, context: dict, cond: dict) -> bool:
     if op == "neq":
         return left != val
     if op == "gt":
-        return left > val
+        try:
+            return left > val
+        except TypeError:
+            return False
     if op == "lt":
-        return left < val
+        try:
+            return left < val
+        except TypeError:
+            return False
+    if op == "in":
+        try:
+            return left in val
+        except Exception:
+            return False
     return False
 
 

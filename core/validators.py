@@ -12,6 +12,7 @@ def validate_rules(blueprint: Blueprint):
             cond = rule.if_
             lf = cond.local_field
             fdef = entity_def.fields.get(lf)
+            then_field = rule.then.field
             if not fdef:
                 raise ValueError(
                     f"[Ошибка] В rules[{idx}] сущности '{entity_name}' указано "
@@ -23,6 +24,25 @@ def validate_rules(blueprint: Blueprint):
                     f"[Ошибка] local_field '{lf}' в rules[{idx}] сущности '{entity_name}' "
                     f"должен быть типа REFERENCE"
                 )
+
+            if then_field not in entity_def.fields:
+                raise ValueError(
+                    f"[Ошибка] В rules[{idx}] сущности '{entity_name}' указано действие "
+                    f"для несуществующего поля '{then_field}'"
+                )
+
+            if rule.then.action not in {"set", "adjust"}:
+                raise ValueError(
+                    f"[Ошибка] В rules[{idx}] сущности '{entity_name}' указано "
+                    f"недопустимое действие '{rule.then.action}'"
+                )
+
+            if rule.then.action == "set":
+                min_val, max_val = rule.then.min, rule.then.max
+                if min_val is not None and max_val is not None and min_val > max_val:
+                    raise ValueError(
+                        f"[Ошибка] В rules[{idx}] min ({min_val}) не может быть больше max ({max_val})"
+                    )
 
             ref_entity = fdef.params.get("entity")
             ref_field = fdef.params.get("field")
@@ -57,7 +77,7 @@ def validate_rules(blueprint: Blueprint):
                     f"[Ошибка] Для числового поля '{cond_field}' "
                     f"недопустимый оператор '{cond.op}'"
                 )
-            if target_fdef.type == FieldType.STRING:
+            if target_fdef.type == FieldType.STRING and cond.op not in {"eq", "neq"}:
                 raise ValueError(
                     f"[Ошибка] Для STRING поля '{cond_field}' "
                     f"нет допустимых операторов"

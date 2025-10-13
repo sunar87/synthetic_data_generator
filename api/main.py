@@ -1,11 +1,13 @@
 from fastapi import FastAPI
-from api.routes import router
+from api.routes import generate, download, health
 
-app = FastAPI(title="Synthetic Data Generator API")
+app = FastAPI(
+    title="Synthetic Data Generator API",
+    version="1.0.0",
+    description="API для генерации синтетических данных по JSON-чертежу."
+)
 
-app.include_router(router, prefix="/api", tags=["generation"])
-
-
-@app.get("/")
-def root():
-    return {"message": "API is running!"}
+# Подключаем роутеры с сохранением адресов
+app.include_router(generate.router, prefix="/api", tags=["Generate"])
+app.include_router(download.router, prefix="/api", tags=["Download"])
+app.include_router(health.router, prefix="/api", tags=["Health"])
