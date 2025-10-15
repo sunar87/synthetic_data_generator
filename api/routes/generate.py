@@ -1,6 +1,7 @@
 import os
 import json
 from uuid import uuid4
+import time
 
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import JSONResponse
@@ -8,9 +9,11 @@ from fastapi.responses import JSONResponse
 from core.engine import DataGenerationEngine
 from core.models import GenerationRequest
 from core.validators import validate_one_to_many, validate_rules
+from api.loger import get_logger
 
 
 router = APIRouter()
+logger = get_logger(__name__)
 
 
 @router.post("/generate", response_class=JSONResponse)
@@ -19,7 +22,9 @@ def generate_data(request: GenerationRequest):
     Генерирует данные на основе переданного blueprint.
     Возвращает результат и ссылку для скачивания файла.
     """
+    start_time = time.time()
     try:
+        logger.info(f"Запрос на генерацию: seed={request.seed}, entities={list(request.blueprint.entities.keys())}")
         validate_one_to_many(request.blueprint)
         validate_rules(request.blueprint)
 
@@ -40,6 +45,8 @@ def generate_data(request: GenerationRequest):
         }
 
     except Exception as e:
+        elapsed = round(time.time() - start_time, 2)
+        logger.exception(f"❌ Ошибка при генерации ({elapsed}s): {e}")
         raise HTTPException(status_code=400, detail=str(e))
 
 
