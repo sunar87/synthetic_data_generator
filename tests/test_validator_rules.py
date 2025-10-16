@@ -25,7 +25,6 @@ def make_blueprint_with_ref(valid=True):
     bp = Blueprint(entities={"users": users, "orders": orders})
 
     if not valid:
-        # Удаляем нужное поле, чтобы вызвать ошибку
         del bp.entities["users"].fields["id"]
 
     return bp
