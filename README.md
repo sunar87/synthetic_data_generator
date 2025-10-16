@@ -87,6 +87,7 @@ print(result)
 
    **Ниже представлена наглядная схема генерации данных**
 
+```
  +---------------------+
 |     JSON Blueprint  |
 |  (entities + rules) |
@@ -113,7 +114,7 @@ print(result)
    v                v
 API Response      Database
 (/api/download/...)  (*in development. will be soon*)
-
+```
 
 ---
 
